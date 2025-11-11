@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createPersonas } from "@/lib/orchestrator/personas";
-import type { BookResult } from "@/lib/types";
+import type { BookResult, Persona } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest
+): Promise<
+  NextResponse<
+    | { personas: [Persona, Persona]; meta: BookResult }
+    | { error: string; details?: string }
+  >
+> {
   try {
     const body = await request.json();
     const metaHint: BookResult = body.metaHint;

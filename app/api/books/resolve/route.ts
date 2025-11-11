@@ -4,7 +4,9 @@ import type { BookResult } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<BookResult | { error: string }>> {
   try {
     const body = await request.json();
     const metaHint: Partial<BookResult> = body;

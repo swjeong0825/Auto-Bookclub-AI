@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { search } from "@/lib/providers/books/openlibrary";
+import type { BookResult } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest
+): Promise<NextResponse<BookResult[] | { error: string }>> {
   try {
     const searchParams = request.nextUrl.searchParams;
     const title = searchParams.get("title");
