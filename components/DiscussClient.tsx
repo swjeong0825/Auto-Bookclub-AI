@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/useAppStore";
+import type { Persona } from "@/lib/types";
 
 export default function DiscussClient() {
   const router = useRouter();
@@ -33,7 +34,10 @@ export default function DiscussClient() {
           }
 
           const j1 = await r1.json();
-          currentPersonas = j1.personas;
+          if (!j1.personas) {
+            throw new Error("Personas response missing personas data");
+          }
+          currentPersonas = j1.personas as [Persona, Persona];
           setPersonas(currentPersonas);
         }
 
