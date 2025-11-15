@@ -42,9 +42,19 @@ Return type for each turn is a JSON object validated against the provided JSON S
 ## Implementation
 
 - Prompts are stored as string constants
-- Passed to `openaiJson()` via `system` parameter
-- Book context passed via `input` parameter
-- JSON Schema enforced with `strict: true`
+- Passed to `openaiJson()` via `system` parameter (maps to `instructions` in Responses API)
+- Book context passed via `input` parameter (maps to `input` in Responses API)
+- JSON Schema enforced with `strict: true` via `response_format.json_schema.strict`
+- Uses OpenAI Responses API (`/v1/responses`) endpoint
+
+### API Integration Details
+
+The `openaiJson()` function in `lib/openai.ts`:
+- Accepts `system` (instructions), `input` (data), `schema` (JSON Schema), and `maxOutputTokens`
+- Maps `system` → `instructions` field in API request
+- Maps `input` → `input` field in API request
+- Maintains conceptual separation: System provides guidelines, User provides specific data
+- The Responses API uses `instructions` and `input` fields rather than role-based messages
 
 ## Constraints
 

@@ -1,96 +1,122 @@
-export async function openaiJson<T>(opts: {
+/**
+ * OpenAI Responses API client
+ * 
+ * Uses the /v1/responses endpoint with structured JSON output via JSON Schema.
+ * 
+ * Design:
+ * - `instructions` (system parameter): Provides the prompt and generic guidelines
+ * - `input` (input parameter): Provides the specific data/context
+ * 
+ * While we maintain the conceptual separation of System (instructions) and User (input),
+ * the Responses API uses `instructions` and `input` fields rather than role-based messages.
+ */
+
+interface OpenaiJsonOptions<T> {  
+  /** System prompt providing guidelines and behavior instructions */
   system: string;
-  input?: any;
-  schema: any;
-  model?: string;
+  /** Specific input data/context for this request */
+  input: unknown;
+  /** JSON Schema for structured output validation */
+  schema: Record<string, unknown>;
+  /** Maximum output tokens (optional) */
   maxOutputTokens?: number;
-}): Promise<T> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY environment variable is not set");
+
+}
+
+const OPENAI_BASE_URL = "https://api.openai.com/v1/responses";
+
+function getApiKey(): string {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) {
+    throw new Error("OPENAI_API_KEY environment variable is required");
+  }
+  return key;
+}
+
+function getModel(): string {
+  return process.env.OPENAI_MODEL || "gpt-4o-mini";
+}
+
+/**
+ * Calls OpenAI Responses API with structured JSON output
+ * 
+ * @param options Configuration object with system prompt, input data, and JSON schema
+ * @returns Parsed JSON response matching the provided schema
+ * @throws Error if API call fails or response doesn't match schema
+ */
+export async function openaiJson<T>(options: OpenaiJsonOptions<T>): Promise<T> {
+  const { system, input, schema, maxOutputTokens } = options;
+
+  const apiKey = getApiKey();
+  const model = getModel();
+
+  const requestBody: {
+    model: string;
+    instructions: string;
+    input: string | unknown[];
+    text: {
+      format: {
+        type: "json_schema";
+        name: string;
+        schema: Record<string, unknown>;
+        strict: boolean;
+      };
+    };
+    max_output_tokens?: number;
+  } = {
+    model: model,
+    instructions: system,
+    input: typeof input === "string" || Array.isArray(input) 
+      ? input 
+      : JSON.stringify(input),
+    text: {
+      format: {
+        type: "json_schema",
+        name: "structured_output",
+        schema: schema,
+        strict: true,
+      },
+    },
+  };
+
+  if (maxOutputTokens !== undefined) {
+    requestBody.max_output_tokens = maxOutputTokens;
   }
 
-  // Try Responses API first, fallback to Chat Completions
-  const useResponsesAPI = process.env.USE_RESPONSES_API === "true";
-  const endpoint = useResponsesAPI
-    ? "https://api.openai.com/v1/responses"
-    : "https://api.openai.com/v1/chat/completions";
-
-  const model = opts.model ?? process.env.OPENAI_MODEL ?? "gpt-4o-mini";
-
-  let requestBody: any;
-  if (useResponsesAPI) {
-    // Responses API format
-    requestBody = {
-      model,
-      system: opts.system,
-      input: opts.input,
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "auto_bookclub",
-          schema: opts.schema,
-          strict: true,
-        },
-      },
-      max_output_tokens: opts.maxOutputTokens ?? 400,
-    };
-  } else {
-    // Chat Completions API format with JSON mode
-    const userMessage = opts.input
-      ? `Book context: ${JSON.stringify(opts.input, null, 2)}`
-      : "Generate the response based on the system instructions.";
-
-    requestBody = {
-      model,
-      messages: [
-        { role: "system", content: opts.system },
-        { role: "user", content: userMessage },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "auto_bookclub",
-          schema: opts.schema,
-          strict: true,
-        },
-      },
-      max_tokens: opts.maxOutputTokens ?? 400,
-    };
-  }
-
-  const res = await fetch(endpoint, {
+  const response = await fetch(OPENAI_BASE_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(requestBody),
   });
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    let errorMessage = `OpenAI API error: ${res.status}`;
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = `OpenAI API error: ${response.status} ${response.statusText}`;
     try {
       const errorJson = JSON.parse(errorText);
-      errorMessage += ` - ${errorJson.error?.message || errorText}`;
+      errorMessage = errorJson.error?.message || errorMessage;
     } catch {
-      errorMessage += ` - ${errorText}`;
+      errorMessage = `${errorMessage}\n${errorText}`;
     }
     throw new Error(errorMessage);
   }
 
-  const j = await res.json();
+  const data = await response.json();
+  // The Responses API with JSON Schema returns structured output
+  // Response format: array with content items containing text fields
+  // Structure: data[0].content[0].text (JSON string that needs parsing)
 
-  if (useResponsesAPI) {
-    return JSON.parse(j.output_text) as T;
-  } else {
-    // Chat Completions API response
-    const content = j.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error("No content in OpenAI response");
-    }
-    return JSON.parse(content) as T;
+  const parsed = JSON.parse(data.output[0].content[0].text);
+
+  // check if parsed is the type T
+
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Invalid JSON response from OpenAI");
   }
+
+  return parsed as T;
 }
 

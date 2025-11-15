@@ -47,6 +47,18 @@ All API routes are in `app/api/`:
 - `lib/orchestrator/debate.ts` - Generates debate turns sequentially
 - System prompts are book-agnostic and stored in `lib/prompts/`
 
+### OpenAI Integration
+
+- **API**: OpenAI Responses API (`/v1/responses`)
+- **Client**: `lib/openai.ts` - `openaiJson()` function
+- **Request Structure**:
+  - `instructions`: System-level prompts and guidelines (conceptual "System" role)
+  - `input`: Specific data/context for the request (conceptual "User" role)
+  - `response_format`: JSON Schema with `strict: true` for structured output
+- **Response Format**: Structured JSON output validated against provided schema
+- **Model**: Configurable via `OPENAI_MODEL` env var (default: `gpt-4o-mini`)
+- **Authentication**: `OPENAI_API_KEY` environment variable required
+
 ## Data Flow
 
 1. User searches → `/api/books/search` → Open Library
