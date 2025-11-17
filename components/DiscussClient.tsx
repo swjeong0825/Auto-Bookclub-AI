@@ -2,12 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAppStore } from "@/lib/store/useAppStore";
-import type { Persona } from "@/lib/types";
+import { useAppStore } from "@/lib/store/client";
+import type { Persona, Transcript } from "@/lib/types";
+import { SSE_PREFIX } from "@/lib/constants";
 
 export default function DiscussClient() {
   const router = useRouter();
-  const { meta, personas, transcript, setPersonas, setTranscript } = useAppStore();
+  const { meta, personas, transcript, setPersonas, setTranscript, setProgress } = useAppStore();
   const hasStartedRef = useRef(false);
   
 
@@ -73,11 +74,51 @@ export default function DiscussClient() {
           throw new Error(errorMsg);
         }
 
-        const j2 = await r2.json();
-        setTranscript(j2);
+        // Read the stream
+        const reader = r2.body?.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        if (!reader) {
+          throw new Error("Response body is not a stream");
+        }
+
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) {
+            break;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          
+          // Process complete SSE messages (lines ending with \n\n)
+          const lines = buffer.split("\n\n");
+          buffer = lines.pop() || ""; // Keep incomplete message in buffer
+
+          for (const line of lines) {
+            if (line.startsWith(SSE_PREFIX)) {
+              try {
+                const data = JSON.parse(line.slice(SSE_PREFIX.length));
+                
+                if (data.type === "progress") {
+                  setProgress(data.progress);
+                } else if (data.type === "complete") {
+                  setTranscript(data.transcript as Transcript);
+                  setProgress(undefined); // Clear progress when complete
+                } else if (data.type === "error") {
+                  throw new Error(data.details || data.error || "Unknown error");
+                }
+              } catch (parseError) {
+                console.error("Error parsing SSE data:", parseError, line);
+              }
+            }
+          }
+        }
       } catch (error) {
         console.error("Discussion pipeline error:", error);
         hasStartedRef.current = false; // Reset on error so user can retry
+        setProgress(undefined); // Clear progress on error
       }
     })();
     // Only depend on meta - other values are checked inside the effect

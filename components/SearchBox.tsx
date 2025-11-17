@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAppStore } from "@/lib/store/useAppStore";
+import { useAppStore } from "@/lib/store/client";
 import ResultsModal from "./ResultsModal";
 import type { BookResult } from "@/lib/types";
 

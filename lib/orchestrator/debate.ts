@@ -1,6 +1,7 @@
 import { openaiJson } from "@/lib/openai";
 import { debateSystemPrompt } from "@/lib/prompts/debate.system";
 import type { BookResult, Persona, DebateTurn, Transcript } from "@/lib/types";
+import { DiscussionLoadingState } from "@/lib/store/server";
 
 const debateTurnSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -16,7 +17,8 @@ const debateTurnSchema = {
 export async function generateDebate(
   meta: BookResult,
   personas: [Persona, Persona],
-  turns: number = 12
+  turns: number = 12,
+  loadingState: DiscussionLoadingState
 ): Promise<Transcript> {
   const input = {
     book: {
@@ -59,6 +61,11 @@ export async function generateDebate(
       text: turn.text,
       topic: turn.topic,
     });
+
+    // Increment the loading state after each discussion turn is created
+    if (loadingState) {
+      loadingState.incrementCreatedDiscussions();
+    }
 
     currentSpeaker = currentSpeaker === "A" ? "B" : "A";
   }

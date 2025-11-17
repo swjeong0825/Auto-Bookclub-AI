@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAppStore } from "@/lib/store/useAppStore";
+import { useAppStore } from "@/lib/store/client";
 
 export default function RecentActions() {
   const router = useRouter();
