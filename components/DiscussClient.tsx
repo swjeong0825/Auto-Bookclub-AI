@@ -9,6 +9,7 @@ export default function DiscussClient() {
   const router = useRouter();
   const { meta, personas, transcript, setPersonas, setTranscript } = useAppStore();
   const hasStartedRef = useRef(false);
+  
 
   useEffect(() => {
     if (!meta) {
