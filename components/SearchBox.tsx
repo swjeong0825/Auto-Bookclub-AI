@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/client";
+import { Language } from "@/lib/constants";
 import ResultsModal from "./ResultsModal";
 import type { BookResult } from "@/lib/types";
 
@@ -11,6 +12,7 @@ export default function SearchBox() {
   const [results, setResults] = useState<BookResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [language, setLanguage] = useState(Language.ENGLISH);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { setMeta } = useAppStore();
@@ -54,7 +56,7 @@ export default function SearchBox() {
         body: JSON.stringify(book),
       });
       const resolved = await res.json();
-      setMeta(resolved);
+      setMeta(resolved, language);
       router.push("/discuss");
     } catch (error) {
       console.error("Resolve failed:", error);
@@ -95,6 +97,8 @@ export default function SearchBox() {
           results={results}
           onSelect={handleSelect}
           onClose={() => setShowModal(false)}
+          selectedLanguage={language}
+          onLanguageChange={(lang) => setLanguage(lang as Language)}
         />
       )}
     </>

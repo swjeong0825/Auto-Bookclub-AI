@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createPersonas } from "@/lib/orchestrator/personas";
+import { Language } from "@/lib/constants";
 import type { BookResult, Persona } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export async function POST(
   try {
     const body = await request.json();
     const metaHint: BookResult = body.metaHint;
+    const language: Language = body.language || Language.ENGLISH;
 
     if (!metaHint || !metaHint.title) {
       return NextResponse.json(
@@ -23,7 +25,7 @@ export async function POST(
       );
     }
 
-    const personas = await createPersonas(metaHint);
+    const personas = await createPersonas(metaHint, language);
     return NextResponse.json({ personas, meta: metaHint });
   } catch (error) {
     console.error("Personas error:", error);

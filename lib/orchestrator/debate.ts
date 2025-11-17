@@ -1,5 +1,6 @@
 import { openaiJson } from "@/lib/openai";
-import { debateSystemPrompt } from "@/lib/prompts/debate.system";
+import { getDebateSystemPrompt } from "@/lib/prompts/debate.system";
+import { Language } from "@/lib/constants";
 import type { BookResult, Persona, DebateTurn, Transcript } from "@/lib/types";
 import { DiscussionLoadingState } from "@/lib/store/server";
 
@@ -18,7 +19,8 @@ export async function generateDebate(
   meta: BookResult,
   personas: [Persona, Persona],
   turns: number = 12,
-  loadingState: DiscussionLoadingState
+  loadingState: DiscussionLoadingState,
+  language: Language = Language.ENGLISH
 ): Promise<Transcript> {
   const input = {
     book: {
@@ -49,7 +51,7 @@ export async function generateDebate(
     };
 
     const turn = await openaiJson<{ text: string; topic?: string }>({
-      system: debateSystemPrompt,
+      system: getDebateSystemPrompt(language),
       input: turnInput,
       schema: debateTurnSchema,
       maxOutputTokens: 200,

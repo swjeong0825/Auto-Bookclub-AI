@@ -8,3 +8,11 @@
  */
 export const SSE_PREFIX = "data: ";
 
+/**
+ * Supported languages for AI-generated discussions
+ */
+export enum Language {
+  ENGLISH = "en",
+  KOREAN = "ko",
+}
+

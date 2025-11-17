@@ -2,17 +2,27 @@
 
 import { useEffect, useRef } from "react";
 import type { BookResult } from "@/lib/types";
+import { Language } from "@/lib/constants";
+
+const LANGUAGE_OPTIONS = [
+  { label: "English", value: Language.ENGLISH },
+  { label: "Korean", value: Language.KOREAN },
+];
 
 interface ResultsModalProps {
   results: BookResult[];
   onSelect: (book: BookResult) => void;
   onClose: () => void;
+  selectedLanguage: string;
+  onLanguageChange: (language: string) => void;
 }
 
 export default function ResultsModal({
   results,
   onSelect,
   onClose,
+  selectedLanguage,
+  onLanguageChange,
 }: ResultsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
@@ -45,9 +55,19 @@ export default function ResultsModal({
       <div className="modal card" ref={modalRef}>
         <div className="modal-header">
           <h2>Select a book</h2>
-          <button onClick={onClose} className="btn-close" aria-label="Close">
-            ×
-          </button>
+          <select
+            id="discussion-language"
+            className="language-select"
+            value={selectedLanguage}
+            onChange={(event) => onLanguageChange(event.target.value)}
+            aria-label="Discussion language"
+          >
+            {LANGUAGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="modal-body">
           {results.length === 0 ? (

@@ -8,7 +8,7 @@ import { SSE_PREFIX } from "@/lib/constants";
 
 export default function DiscussClient() {
   const router = useRouter();
-  const { meta, personas, transcript, setPersonas, setTranscript, setProgress } = useAppStore();
+  const { meta, language, personas, transcript, setPersonas, setTranscript, setProgress } = useAppStore();
   const hasStartedRef = useRef(false);
   
 
@@ -39,7 +39,7 @@ export default function DiscussClient() {
           const r1 = await fetch("/api/discussions/personas", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ metaHint: meta }),
+            body: JSON.stringify({ metaHint: meta, language }),
           });
 
           if (!r1.ok) {
@@ -64,6 +64,7 @@ export default function DiscussClient() {
             metaHint: meta,
             personas: currentPersonas,
             turns: 12,
+            language,
           }),
         });
 

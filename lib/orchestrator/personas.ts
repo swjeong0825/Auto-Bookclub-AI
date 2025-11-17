@@ -1,5 +1,6 @@
 import { openaiJson } from "@/lib/openai";
-import { personasSystemPrompt } from "@/lib/prompts/personas.system";
+import { getPersonasSystemPrompt } from "@/lib/prompts/personas.system";
+import { Language } from "@/lib/constants";
 import type { BookResult, Persona } from "@/lib/types";
 
 const personasSchema = {
@@ -29,7 +30,8 @@ const personasSchema = {
 };
 
 export async function createPersonas(
-  meta: BookResult
+  meta: BookResult,
+  language: Language = Language.ENGLISH
 ): Promise<[Persona, Persona]> {
   const input = {
     book: {
@@ -42,7 +44,7 @@ export async function createPersonas(
   };
 
   const result = await openaiJson<{ personas: Persona[] }>({
-    system: personasSystemPrompt,
+    system: getPersonasSystemPrompt(language),
     input,
     schema: personasSchema,
     maxOutputTokens: 600,

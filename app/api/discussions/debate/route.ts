@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDebate } from "@/lib/orchestrator/debate";
+import { Language, SSE_PREFIX } from "@/lib/constants";
 import type { BookResult, Persona, Transcript } from "@/lib/types";
 import { DiscussionLoadingState } from "@/lib/store/server";
-import { SSE_PREFIX } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +20,7 @@ export async function POST(
     const metaHint: BookResult = body.metaHint;
     const personas: [Persona, Persona] = body.personas;
     const turns: number = body.turns || 12;
+    const language: Language = body.language || Language.ENGLISH;
 
     if (!metaHint || !metaHint.title) {
       return NextResponse.json(
@@ -59,7 +60,7 @@ export async function POST(
         }, 1000);
 
         try {
-          const transcript = await generateDebate(metaHint, personas, turns, loadingState);
+          const transcript = await generateDebate(metaHint, personas, turns, loadingState, language);
           clearInterval(intervalId);
           
           // Send final progress (100%)
