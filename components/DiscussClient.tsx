@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/useAppStore";
 import type { Persona } from "@/lib/types";
 
 export default function DiscussClient() {
   const router = useRouter();
-  const { meta, personas, setPersonas, setTranscript } = useAppStore();
+  const { meta, personas, transcript, setPersonas, setTranscript } = useAppStore();
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     if (!meta) {
@@ -15,8 +16,21 @@ export default function DiscussClient() {
       return;
     }
 
+    // If transcript exists, we're done - don't run again
+    if (transcript) {
+      return;
+    }
+
+    // Prevent multiple calls - if we've already started, don't run again
+    if (hasStartedRef.current) {
+      return;
+    }
+
+    hasStartedRef.current = true;
+
     (async () => {
       try {
+        // Get current personas from store (may have been set by previous run)
         let currentPersonas = personas;
         
         if (!currentPersonas) {
@@ -62,9 +76,12 @@ export default function DiscussClient() {
         setTranscript(j2);
       } catch (error) {
         console.error("Discussion pipeline error:", error);
+        hasStartedRef.current = false; // Reset on error so user can retry
       }
     })();
-  }, [meta, personas, router, setPersonas, setTranscript]);
+    // Only depend on meta - other values are checked inside the effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meta]);
 
   return null;
 }
