@@ -279,7 +279,7 @@ Generate a debate transcript between two personas discussing a book.
 {
   metaHint: BookResult;
   personas: [Persona, Persona];
-  turns?: number; // Optional, default: 12
+  turns?: number; // Optional, default: 6
 }
 ```
 
@@ -309,7 +309,7 @@ Generate a debate transcript between two personas discussing a book.
       "tagline": "Big Brother is already here, we just call it Big Tech"
     }
   ],
-  "turns": 12
+  "turns": 6
 }
 ```
 
@@ -379,7 +379,7 @@ Or:
 - Generates turns sequentially, alternating between speaker "A" and "B"
 - Each turn includes `text` and `topic` fields
 - Turn indices start at 0
-- Default number of turns is 12 if not specified
+- Default number of turns is 6 if not specified
 - Each turn is generated with context from all previous turns
 
 ---
@@ -473,7 +473,7 @@ A typical workflow for generating a book debate:
    {
      "metaHint": { "title": "1984", ... },
      "personas": [...],
-     "turns": 12
+     "turns": 6
    }
    ```
 

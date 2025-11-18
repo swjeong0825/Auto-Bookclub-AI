@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDebate } from "@/lib/orchestrator/debate";
 import { Language, SSE_PREFIX } from "@/lib/constants";
-import type { BookResult, Persona, Transcript } from "@/lib/types";
+import type { BookResult, Persona, Transcript, DebateTurn } from "@/lib/types";
 import { DiscussionLoadingState } from "@/lib/store/server";
 
 export const dynamic = "force-dynamic";
 
 /**
+ * Continues a discussion with a user prompt
  * @returns A streaming response with SSE messages:
  *   - { type: "progress", progress: number }
- *   - { type: "complete", transcript: Transcript }
+ *   - { type: "complete", newTurns: DebateTurn[] }
  *   - { type: "error", error: string, details?: string }
  */
 export async function POST(
@@ -19,8 +20,10 @@ export async function POST(
     const body = await request.json();
     const metaHint: BookResult = body.metaHint;
     const personas: [Persona, Persona] = body.personas;
-    const turns: number = body.turns || 6;
+    const currentTranscript: DebateTurn[] = body.currentTranscript || [];
+    const userPrompt: string = body.userPrompt;
     const language: Language = body.language || Language.ENGLISH;
+    const continueTurns: number = body.continueTurns || 6;
 
     if (!metaHint || !metaHint.title) {
       return NextResponse.json(
@@ -36,8 +39,15 @@ export async function POST(
       );
     }
 
+    if (!userPrompt || userPrompt.trim().length === 0) {
+      return NextResponse.json(
+        { error: "userPrompt is required" },
+        { status: 400 }
+      );
+    }
+
     const loadingState = new DiscussionLoadingState();
-    loadingState.setTotalDiscussions(turns);
+    loadingState.setTotalDiscussions(continueTurns);
 
     // Create a ReadableStream to send progress updates
     const stream = new ReadableStream({
@@ -60,14 +70,53 @@ export async function POST(
         }, 1000);
 
         try {
-          const transcript = await generateDebate(metaHint, personas, turns, loadingState, language);
+          // Create user turn
+          const nextIdx = currentTranscript.length;
+          const userTurn: DebateTurn = {
+            idx: nextIdx,
+            speaker: "USER",
+            text: userPrompt,
+            topic: undefined,
+          };
+
+          // Determine next speaker (should be opposite of last AI speaker)
+          // Find the last non-USER turn to determine who should speak next
+          let nextSpeaker: "A" | "B" = "A";
+          for (let i = currentTranscript.length - 1; i >= 0; i--) {
+            if (currentTranscript[i].speaker !== "USER") {
+              nextSpeaker = currentTranscript[i].speaker === "A" ? "B" : "A";
+              break;
+            }
+          }
+
+          // Generate continuation with user prompt as context
+          const continuationTranscript = await generateDebate(
+            metaHint,
+            personas,
+            continueTurns,
+            loadingState,
+            language,
+            [...currentTranscript, userTurn], // Include user turn in context
+            nextSpeaker
+          );
+
           clearInterval(intervalId);
           
           // Send final progress (100%)
           sendProgress(1.0);
           
-          // Send the completed transcript
-          const finalData = JSON.stringify({ type: "complete", transcript });
+          // The new turns start after the user turn
+          // We need to re-index them to continue from where we left off
+          const newTurns = [
+            userTurn,
+            ...continuationTranscript.turns.map((turn, idx) => ({
+              ...turn,
+              idx: nextIdx + 1 + idx,
+            }))
+          ];
+          
+          // Send the completed new turns
+          const finalData = JSON.stringify({ type: "complete", newTurns });
           controller.enqueue(encoder.encode(`${SSE_PREFIX}${finalData}\n\n`));
           
           // Close the stream
@@ -78,7 +127,7 @@ export async function POST(
             debateError instanceof Error ? debateError.message : "Unknown error";
           const errorData = JSON.stringify({ 
             type: "error", 
-            error: "Failed to generate debate", 
+            error: "Failed to continue debate", 
             details: errorMessage 
           });
           controller.enqueue(encoder.encode(`${SSE_PREFIX}${errorData}\n\n`));
@@ -95,11 +144,11 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Debate error:", error);
+    console.error("Continue debate error:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to generate debate", details: errorMessage },
+      { error: "Failed to continue debate", details: errorMessage },
       { status: 500 }
     );
   }

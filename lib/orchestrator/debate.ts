@@ -18,9 +18,11 @@ const debateTurnSchema = {
 export async function generateDebate(
   meta: BookResult,
   personas: [Persona, Persona],
-  turns: number = 12,
+  turns: number = 6,
   loadingState: DiscussionLoadingState,
-  language: Language = Language.ENGLISH
+  language: Language = Language.ENGLISH,
+  previousTurns: DebateTurn[] = [],
+  startingSpeaker: "A" | "B" = "A"
 ): Promise<Transcript> {
   const input = {
     book: {
@@ -36,17 +38,27 @@ export async function generateDebate(
   };
 
   const debateTurns: DebateTurn[] = [];
-  let currentSpeaker: "A" | "B" = "A";
+  let currentSpeaker: "A" | "B" = startingSpeaker;
 
   for (let i = 0; i < turns; i++) {
-    const turnInput = {
-      ...input,
-      currentTurn: i + 1,
-      previousTurns: debateTurns.map((t) => ({
+    // Combine previous turns (if any) with newly generated turns
+    const allPreviousTurns = [
+      ...previousTurns.map((t) => ({
         speaker: t.speaker,
         text: t.text,
         topic: t.topic,
       })),
+      ...debateTurns.map((t) => ({
+        speaker: t.speaker,
+        text: t.text,
+        topic: t.topic,
+      })),
+    ];
+
+    const turnInput = {
+      ...input,
+      currentTurn: previousTurns.length + i + 1,
+      previousTurns: allPreviousTurns,
       currentSpeaker,
     };
 

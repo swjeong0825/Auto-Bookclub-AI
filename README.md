@@ -9,7 +9,7 @@ AI-powered book discussions with contrasting personas. Search for a book, and wa
   - Korean books via Google Books API
   - Automatic language detection
 - **Auto-Personas**: Automatically generates two contrasting book-club personas
-- **AI Debate**: Generates a 12-turn discussion between the personas
+- **AI Debate**: Generates a 6-turn discussion between the personas
 - **Transcript Export**: Copy transcript to clipboard
 
 ## Tech Stack

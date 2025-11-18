@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/client";
+import type { DebateTurn } from "@/lib/types";
+import { SSE_PREFIX } from "@/lib/constants";
 
 export default function Transcript() {
   const router = useRouter();
-  const { meta, transcript, progress, reset } = useAppStore();
+  const { meta, transcript, progress, reset, language, setTranscript } = useAppStore();
   const [copied, setCopied] = useState(false);
+  const [userPrompt, setUserPrompt] = useState("");
+  const [isContinuing, setIsContinuing] = useState(false);
+  const [continueProgress, setContinueProgress] = useState<number | undefined>(undefined);
+  const hasStartedContinue = useRef(false);
 
   if (!meta) {
     return null;
@@ -36,6 +42,96 @@ export default function Transcript() {
     );
   }
 
+  const handleContinueDiscussion = async () => {
+    if (!userPrompt.trim() || !transcript || isContinuing) {
+      return;
+    }
+
+    if (hasStartedContinue.current) {
+      return;
+    }
+
+    hasStartedContinue.current = true;
+    setIsContinuing(true);
+    setContinueProgress(0);
+
+    try {
+      const response = await fetch("/api/discussions/continue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          metaHint: meta,
+          personas: transcript.personas,
+          currentTranscript: transcript.turns,
+          userPrompt: userPrompt.trim(),
+          language,
+          continueTurns: 6,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.details || errorData.error || "Failed to continue discussion";
+        console.error("Continue API error:", errorMsg, errorData);
+        throw new Error(errorMsg);
+      }
+
+      // Read the stream
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      if (!reader) {
+        throw new Error("Response body is not a stream");
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) {
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        
+        // Process complete SSE messages (lines ending with \n\n)
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || ""; // Keep incomplete message in buffer
+
+        for (const line of lines) {
+          if (line.startsWith(SSE_PREFIX)) {
+            try {
+              const data = JSON.parse(line.slice(SSE_PREFIX.length));
+              
+              if (data.type === "progress") {
+                setContinueProgress(data.progress);
+              } else if (data.type === "complete") {
+                const newTurns = data.newTurns as DebateTurn[];
+                // Append new turns to existing transcript
+                setTranscript({
+                  ...transcript,
+                  turns: [...transcript.turns, ...newTurns],
+                });
+                setContinueProgress(undefined);
+                setUserPrompt(""); // Clear the input
+              } else if (data.type === "error") {
+                throw new Error(data.details || data.error || "Unknown error");
+              }
+            } catch (parseError) {
+              console.error("Error parsing SSE data:", parseError, line);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Continue discussion error:", error);
+      setContinueProgress(undefined);
+    } finally {
+      setIsContinuing(false);
+      hasStartedContinue.current = false;
+    }
+  };
+
   const copyToClipboard = () => {
     const text = formatTranscript(transcript);
     navigator.clipboard.writeText(text).then(() => {
@@ -50,8 +146,12 @@ export default function Transcript() {
     text += `Persona B: ${t.personas[1].name} - ${t.personas[1].role}\n\n`;
     text += "---\n\n";
     t.turns.forEach((turn) => {
-      const persona = turn.speaker === "A" ? t.personas[0] : t.personas[1];
-      text += `${persona.name} (${turn.speaker}): ${turn.text}\n\n`;
+      if (turn.speaker === "USER") {
+        text += `You: ${turn.text}\n\n`;
+      } else {
+        const persona = turn.speaker === "A" ? t.personas[0] : t.personas[1];
+        text += `${persona.name} (${turn.speaker}): ${turn.text}\n\n`;
+      }
     });
     return text;
   };
@@ -110,6 +210,25 @@ export default function Transcript() {
 
       <div className="transcript">
         {transcript.turns.map((turn) => {
+          // Handle user turns differently
+          if (turn.speaker === "USER") {
+            return (
+              <div key={turn.idx} className="turn turn-user">
+                <div className="turn-header">
+                  <div className="turn-avatar" style={{ background: "var(--accent-bg)" }}>
+                    U
+                  </div>
+                  <div className="turn-speaker" style={{ fontWeight: 600 }}>
+                    You
+                  </div>
+                </div>
+                <div className="turn-text" style={{ fontStyle: "italic" }}>
+                  {turn.text}
+                </div>
+              </div>
+            );
+          }
+
           const persona =
             turn.speaker === "A" ? transcript.personas[0] : transcript.personas[1];
           return (
@@ -126,6 +245,85 @@ export default function Transcript() {
           );
         })}
       </div>
+
+      {/* Loading state for continuation */}
+      {isContinuing && continueProgress !== undefined && (
+        <div className="loading-state" style={{ marginTop: "var(--space-4)" }}>
+          <p className="subtle">Continuing discussion...</p>
+          <div className="progress-container">
+            <div className="progress-bar">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${Math.round(continueProgress * 100)}%` }}
+              />
+            </div>
+            <p className="progress-text">{Math.round(continueProgress * 100)}%</p>
+          </div>
+        </div>
+      )}
+
+      {/* User prompt input */}
+      {!isContinuing && (
+        <div className="user-prompt-section" style={{ 
+          marginTop: "var(--space-6)", 
+          padding: "var(--space-4)",
+          border: "1px solid var(--border-color)",
+          borderRadius: "var(--radius-md)",
+          background: "var(--surface-bg)"
+        }}>
+          <label 
+            htmlFor="user-prompt" 
+            style={{ 
+              display: "block", 
+              marginBottom: "var(--space-2)",
+              fontWeight: 600,
+              fontSize: "var(--text-base)"
+            }}
+          >
+            Continue the Discussion
+          </label>
+          <p className="subtle" style={{ marginBottom: "var(--space-3)", fontSize: "var(--text-sm)" }}>
+            Ask a question or share your thoughts to continue the conversation with the personas.
+          </p>
+          <textarea
+            id="user-prompt"
+            value={userPrompt}
+            onChange={(e) => setUserPrompt(e.target.value)}
+            placeholder="What are your thoughts on this discussion? Ask a question or share your perspective..."
+            disabled={isContinuing}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                handleContinueDiscussion();
+              }
+            }}
+            style={{
+              width: "100%",
+              minHeight: "120px",
+              padding: "var(--space-3)",
+              border: "1px solid var(--border-color)",
+              borderRadius: "var(--radius-sm)",
+              fontSize: "var(--text-base)",
+              fontFamily: "inherit",
+              resize: "vertical",
+              marginBottom: "var(--space-3)",
+            }}
+          />
+          <button
+            onClick={handleContinueDiscussion}
+            disabled={!userPrompt.trim() || isContinuing}
+            className="btn btn-primary"
+            style={{
+              opacity: !userPrompt.trim() || isContinuing ? 0.5 : 1,
+              cursor: !userPrompt.trim() || isContinuing ? "not-allowed" : "pointer",
+            }}
+          >
+            {isContinuing ? "Continuing..." : "Continue Discussion"}
+          </button>
+          <span className="subtle" style={{ marginLeft: "var(--space-3)", fontSize: "var(--text-sm)" }}>
+            Press ⌘+Enter (or Ctrl+Enter) to submit
+          </span>
+        </div>
+      )}
     </div>
   );
 }

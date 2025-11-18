@@ -18,7 +18,7 @@ export type Persona = {
 
 export type DebateTurn = {
   idx: number;
-  speaker: "A" | "B";
+  speaker: "A" | "B" | "USER";
   text: string;
   topic?: string;
 };

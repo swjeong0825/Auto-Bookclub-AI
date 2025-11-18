@@ -28,7 +28,7 @@ Return type is a JSON array of two persona objects, validated against the provid
 **Location**: `lib/prompts/debate.system.ts`
 
 ```
-You orchestrate a concise debate between Persona A and Persona B. Alternate speakers strictly for ~12 turns.
+You orchestrate a concise debate between Persona A and Persona B. Alternate speakers strictly for ~6 turns.
 
 Each turn ≤ 2 sentences.
 

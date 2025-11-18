@@ -71,7 +71,7 @@ type BookResult = {
 {
   metaHint: BookResult;
   personas: [Persona, Persona];
-  turns?: number; // Optional, default: 12
+  turns?: number; // Optional, default: 6
 }
 ```
 
@@ -85,10 +85,50 @@ type Transcript = {
 
 type DebateTurn = {
   idx: number;
-  speaker: "A" | "B";
+  speaker: "A" | "B" | "USER";
   text: string;
   topic?: string;
 };
+```
+
+## Continue Debate
+
+**Endpoint**: `POST /api/discussions/continue`
+
+**Request Body**:
+```typescript
+{
+  metaHint: BookResult;
+  personas: [Persona, Persona];
+  currentTranscript: DebateTurn[];
+  userPrompt: string;
+  language?: Language; // Optional
+  continueTurns?: number; // Optional, default: 6
+}
+```
+
+**Response**: Server-Sent Events (SSE) Stream
+
+**SSE Message Types**:
+```typescript
+// Progress update (sent periodically)
+{
+  type: "progress";
+  progress: number; // 0.0 to 1.0
+}
+
+// Completion with new turns
+{
+  type: "complete";
+  newTurns: DebateTurn[]; // Includes user turn + 6 AI turns
+}
+
+// Error
+{
+  type: "error";
+  error: string;
+  details?: string;
+}
 ```
 
 ## Error Responses
