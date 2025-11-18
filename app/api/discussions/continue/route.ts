@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDebate } from "@/lib/orchestrator/debate";
-import { Language, SSE_PREFIX } from "@/lib/constants";
+import { Language, SSE_PREFIX, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
 import type { BookResult, Persona, Transcript, DebateTurn } from "@/lib/types";
 import { DiscussionLoadingState } from "@/lib/store/server";
 
@@ -23,7 +23,7 @@ export async function POST(
     const currentTranscript: DebateTurn[] = body.currentTranscript || [];
     const userPrompt: string = body.userPrompt;
     const language: Language = body.language || Language.ENGLISH;
-    const continueTurns: number = body.continueTurns || 6;
+    const continueTurns: number = body.continueTurns || DEFAULT_DISCUSSION_TURNS;
 
     if (!metaHint || !metaHint.title) {
       return NextResponse.json(

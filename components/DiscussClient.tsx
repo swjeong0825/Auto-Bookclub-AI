@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/client";
 import type { Persona, Transcript } from "@/lib/types";
-import { SSE_PREFIX } from "@/lib/constants";
+import { SSE_PREFIX, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
 
 export default function DiscussClient() {
   const router = useRouter();
@@ -63,7 +63,7 @@ export default function DiscussClient() {
           body: JSON.stringify({
             metaHint: meta,
             personas: currentPersonas,
-            turns: 6,
+            turns: DEFAULT_DISCUSSION_TURNS,
             language,
           }),
         });

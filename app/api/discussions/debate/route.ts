@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDebate } from "@/lib/orchestrator/debate";
-import { Language, SSE_PREFIX } from "@/lib/constants";
+import { Language, SSE_PREFIX, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
 import type { BookResult, Persona, Transcript } from "@/lib/types";
 import { DiscussionLoadingState } from "@/lib/store/server";
 
@@ -19,7 +19,7 @@ export async function POST(
     const body = await request.json();
     const metaHint: BookResult = body.metaHint;
     const personas: [Persona, Persona] = body.personas;
-    const turns: number = body.turns || 6;
+    const turns: number = body.turns || DEFAULT_DISCUSSION_TURNS;
     const language: Language = body.language || Language.ENGLISH;
 
     if (!metaHint || !metaHint.title) {

@@ -21,3 +21,10 @@ export enum Language {
   UNKNOWN = "unknown",
 }
 
+/**
+ * Default number of turns to generate in a discussion
+ * - Used for initial debate generation
+ * - Used when user continues the discussion
+ */
+export const DEFAULT_DISCUSSION_TURNS = 4;
+

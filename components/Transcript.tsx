@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/client";
 import type { DebateTurn } from "@/lib/types";
-import { SSE_PREFIX } from "@/lib/constants";
+import { SSE_PREFIX, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
 
 export default function Transcript() {
   const router = useRouter();
@@ -65,7 +65,7 @@ export default function Transcript() {
           currentTranscript: transcript.turns,
           userPrompt: userPrompt.trim(),
           language,
-          continueTurns: 6,
+          continueTurns: DEFAULT_DISCUSSION_TURNS,
         }),
       });
 

@@ -1,6 +1,6 @@
 import { openaiJson } from "@/lib/openai";
 import { getDebateSystemPrompt } from "@/lib/prompts/debate.system";
-import { Language } from "@/lib/constants";
+import { Language, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
 import type { BookResult, Persona, DebateTurn, Transcript } from "@/lib/types";
 import { DiscussionLoadingState } from "@/lib/store/server";
 
@@ -18,7 +18,7 @@ const debateTurnSchema = {
 export async function generateDebate(
   meta: BookResult,
   personas: [Persona, Persona],
-  turns: number = 6,
+  turns: number = DEFAULT_DISCUSSION_TURNS,
   loadingState: DiscussionLoadingState,
   language: Language = Language.ENGLISH,
   previousTurns: DebateTurn[] = [],
