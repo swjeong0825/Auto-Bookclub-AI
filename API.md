@@ -62,7 +62,10 @@ type Transcript = {
 
 Search for books by title using the OpenLibrary API.
 
-**Endpoint**: `GET /api/books/search`
+**Endpoint**: `GET /api/books/{lang}/search`
+
+**Path Parameters**:
+- `lang` (string, **required**) - Language code (currently supported: `en`)
 
 **Query Parameters**:
 - `title` (string, **required**) - The book title to search for
@@ -70,7 +73,7 @@ Search for books by title using the OpenLibrary API.
 
 **Request Example**:
 ```
-GET /api/books/search?title=1984&limit=10
+GET /api/books/en/search?title=1984&limit=10
 ```
 
 **Success Response** (200 OK):
@@ -105,9 +108,11 @@ GET /api/books/search?title=1984&limit=10
 ```
 
 **Implementation Notes**:
-- Uses OpenLibrary search API
+- **English (`en`)**: Uses Open Library API (no authentication required)
+- **Korean (`kr`)**: Uses Google Books API with `langRestrict=ko` (no authentication required)
 - Returns an array of `BookResult` objects
 - All routes use `force-dynamic` rendering
+- Language code determines which book provider is used
 
 ---
 
@@ -115,7 +120,10 @@ GET /api/books/search?title=1984&limit=10
 
 Resolve and enrich book metadata using partial book information.
 
-**Endpoint**: `POST /api/books/resolve`
+**Endpoint**: `POST /api/books/{lang}/resolve`
+
+**Path Parameters**:
+- `lang` (string, **required**) - Language code (currently supported: `en`)
 
 **Request Body**:
 ```typescript
@@ -171,9 +179,12 @@ Or with workKey:
 ```
 
 **Implementation Notes**:
+- **English (`en`)**: Uses Open Library API to fetch detailed work and author information
+- **Korean (`kr`)**: Uses Google Books API to fetch volume details
 - Accepts partial `BookResult` as input
 - At least one of `title` or `workKey` must be provided
 - Returns a fully resolved `BookResult` object
+- `workKey` format differs by provider (Open Library work ID vs Google Books volume ID)
 
 ---
 
@@ -441,12 +452,12 @@ A typical workflow for generating a book debate:
 
 1. **Search for a book**:
    ```
-   GET /api/books/search?title=1984
+   GET /api/books/en/search?title=1984
    ```
 
 2. **Resolve book metadata** (optional, if more details needed):
    ```
-   POST /api/books/resolve
+   POST /api/books/en/resolve
    { "title": "1984", "author": "George Orwell" }
    ```
 

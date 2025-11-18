@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/client";
 import { Language } from "@/lib/constants";
+import { detectLanguage, getLanguageCode } from "@/lib/utils/languageDetection";
 import ResultsModal from "./ResultsModal";
 import type { BookResult } from "@/lib/types";
 
@@ -13,6 +14,7 @@ export default function SearchBox() {
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [language, setLanguage] = useState(Language.ENGLISH);
+  const [detectedLangCode, setDetectedLangCode] = useState("en");
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { setMeta } = useAppStore();
@@ -24,9 +26,24 @@ export default function SearchBox() {
   const handleSearch = async () => {
     if (!query.trim()) return;
 
+    // Detect language from the search query
+    const detectedLang = detectLanguage(query);
+    const langCode = getLanguageCode(detectedLang); // Use detectedLang directly, not state variable
+    
+    // Update state for UI
+    setLanguage(detectedLang);
+    setDetectedLangCode(langCode);
+    
+    // Log detected language (placeholder logic)
+    console.log("===========================================");
+    console.log("🌍 Language Detection Results:");
+    console.log(`   Language: ${detectedLang}`);
+    console.log(`   Language Code: ${langCode}`);
+    console.log("===========================================");
+
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/books/search?title=${encodeURIComponent(query)}&limit=5`);
+      const res = await fetch(`/api/books/${langCode}/search?title=${encodeURIComponent(query)}&limit=5`);
       const data = await res.json();
       setResults(data);
       setShowModal(true);
@@ -50,7 +67,7 @@ export default function SearchBox() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/books/resolve", {
+      const res = await fetch(`/api/books/${detectedLangCode}/resolve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(book),

@@ -9,10 +9,15 @@
 export const SSE_PREFIX = "data: ";
 
 /**
- * Supported languages for AI-generated discussions
+ * Supported languages for AI-generated discussions and book searches
  */
 export enum Language {
   ENGLISH = "en",
-  KOREAN = "ko",
+  KOREAN = "kr",
+  JAPANESE = "ja",
+  CHINESE = "zh",
+  RUSSIAN = "ru",
+  ARABIC = "ar",
+  UNKNOWN = "unknown",
 }
 

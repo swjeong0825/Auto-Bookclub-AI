@@ -2,7 +2,10 @@
 
 ## Book Search
 
-**Endpoint**: `GET /api/books/search`
+**Endpoint**: `GET /api/books/{lang}/search`
+
+**Path Parameters**:
+- `lang` (string, required) - Language code (e.g., `en`, `kr`)
 
 **Query Parameters**:
 - `title` (string, required) - Book title to search
@@ -24,7 +27,10 @@ type BookResult = {
 
 ## Book Resolve
 
-**Endpoint**: `POST /api/books/resolve`
+**Endpoint**: `POST /api/books/{lang}/resolve`
+
+**Path Parameters**:
+- `lang` (string, required) - Language code (e.g., `en`, `kr`)
 
 **Request Body**:
 ```typescript
@@ -103,4 +109,8 @@ Error format:
 - `workKey` is never passed between pages or exposed in client state
 - All API routes use `export const dynamic = "force-dynamic"`
 - OpenAI Responses API used with JSON Schema strict mode
+- **Book Search Providers**:
+  - English (`en`): Open Library API (no auth required)
+  - Korean (`kr`): Google Books API with `langRestrict=ko` (no auth required for basic usage)
+- Language detection automatically routes to appropriate provider
 

@@ -4,7 +4,10 @@ AI-powered book discussions with contrasting personas. Search for a book, and wa
 
 ## Features
 
-- **Book Search**: Search by title using Open Library
+- **Multi-Language Book Search**: 
+  - English books via Open Library API
+  - Korean books via Google Books API
+  - Automatic language detection
 - **Auto-Personas**: Automatically generates two contrasting book-club personas
 - **AI Debate**: Generates a 12-turn discussion between the personas
 - **Transcript Export**: Copy transcript to clipboard
@@ -71,8 +74,10 @@ lib/
 
 ## API Endpoints
 
-- `GET /api/books/search?title=&limit=5` - Search books
-- `POST /api/books/resolve` - Resolve book metadata
+- `GET /api/books/en/search?title=&limit=5` - Search books (English - Open Library)
+- `POST /api/books/en/resolve` - Resolve book metadata (English)
+- `GET /api/books/kr/search?title=&limit=5` - Search books (Korean - Google Books)
+- `POST /api/books/kr/resolve` - Resolve book metadata (Korean)
 - `POST /api/discussions/personas` - Create personas
 - `POST /api/discussions/debate` - Generate debate
 

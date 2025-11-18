@@ -30,16 +30,18 @@ Auto-Bookclub AI is a Next.js App Router application that generates AI-powered b
 ### API Routes
 
 All API routes are in `app/api/`:
-- `GET /api/books/search` - Search books by title
-- `POST /api/books/resolve` - Enrich book metadata
+- `GET /api/books/{lang}/search` - Search books by title (lang: en, kr, etc.)
+- `POST /api/books/{lang}/resolve` - Enrich book metadata (lang: en, kr, etc.)
 - `POST /api/discussions/personas` - Generate personas
 - `POST /api/discussions/debate` - Generate debate transcript
 
 ### Book Provider Pattern
 
 - Abstract interface in `lib/providers/books/index.ts`
-- Implementation in `lib/providers/books/openlibrary.ts`
+- **English books**: `lib/providers/books/openlibrary.ts` (Open Library API)
+- **Korean books**: `lib/providers/books/googlebooks.ts` (Google Books API with `langRestrict=ko`)
 - `workKey` is internal-only; never exposed in routes or client state
+- Language detection in `lib/utils/languageDetection.ts` routes to appropriate provider
 
 ### Orchestration Layer
 
@@ -61,8 +63,8 @@ All API routes are in `app/api/`:
 
 ## Data Flow
 
-1. User searches → `/api/books/search` → Open Library
-2. User selects → `/api/books/resolve` → Enriched metadata → Zustand
+1. User searches → `/api/books/{lang}/search` → Open Library
+2. User selects → `/api/books/{lang}/resolve` → Enriched metadata → Zustand
 3. Navigate to `/discuss` → Auto-triggers personas → Debate
 4. Transcript rendered from Zustand state
 
