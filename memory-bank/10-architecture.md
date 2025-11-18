@@ -34,6 +34,7 @@ All API routes are in `app/api/`:
 - `POST /api/books/{lang}/resolve` - Enrich book metadata (lang: en, kr, etc.)
 - `POST /api/discussions/personas` - Generate personas
 - `POST /api/discussions/debate` - Generate debate transcript
+- `POST /api/discussions/continue` - Continue discussion with user prompt
 
 ### Book Provider Pattern
 
@@ -67,6 +68,8 @@ All API routes are in `app/api/`:
 2. User selects → `/api/books/{lang}/resolve` → Enriched metadata → Zustand
 3. Navigate to `/discuss` → Auto-triggers personas → Debate
 4. Transcript rendered from Zustand state
+5. User submits prompt → `/api/discussions/continue` → 6 more turns → Appended to transcript
+6. User can continue prompting indefinitely
 
 ## Key Design Decisions
 
@@ -74,4 +77,6 @@ All API routes are in `app/api/`:
 - **Sequential debate generation**: Each turn generated individually for better control
 - **JSON Schema enforcement**: Strict schema validation via OpenAI Responses API
 - **Book-agnostic prompts**: System prompts define behavior, not book facts
+- **Interactive continuation**: Users can add prompts to continue discussions with full context
+- **Three speaker types**: "A", "B" (personas), and "USER" (user contributions)
 

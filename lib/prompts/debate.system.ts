@@ -1,6 +1,6 @@
 import { Language } from "@/lib/constants";
 
-const englishDebatePrompt = `You orchestrate a focused discussion between Persona A and Persona B about the book's characters, their decisions, and actions. Alternate speakers strictly for ~12 turns.
+const englishDebatePrompt = `You orchestrate a focused discussion between Persona A and Persona B about the book's characters, their decisions, and actions. Alternate speakers strictly for ~6 turns.
 
 Focus the discussion on:
 1. Specific decisions and actions taken by the main characters in the book
@@ -12,7 +12,7 @@ Each turn should be 2-3 sentences, engaging directly with character decisions an
 
 Return type for each turn is a JSON object validated against the provided JSON Schema.`;
 
-const koreanDebatePrompt = `당신은 페르소나 A와 페르소나 B가 책의 등장인물들, 그들의 결정과 행동에 대해 토론하도록 조율합니다. 약 12턴 동안 엄격하게 발언자를 교대합니다.
+const koreanDebatePrompt = `당신은 페르소나 A와 페르소나 B가 책의 등장인물들, 그들의 결정과 행동에 대해 토론하도록 조율합니다. 약 6턴 동안 엄격하게 발언자를 교대합니다.
 
 **중요: 토론의 모든 내용은 반드시 한국어로 작성되어야 합니다. JSON 응답의 'text' 필드와 'topic' 필드를 포함한 모든 토론 텍스트를 한국어로 생성하세요. 영어를 사용하지 마세요.**
 

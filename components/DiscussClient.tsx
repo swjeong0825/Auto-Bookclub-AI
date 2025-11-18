@@ -63,7 +63,7 @@ export default function DiscussClient() {
           body: JSON.stringify({
             metaHint: meta,
             personas: currentPersonas,
-            turns: 12,
+            turns: 6,
             language,
           }),
         });
