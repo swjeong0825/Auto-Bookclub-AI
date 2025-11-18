@@ -11,7 +11,7 @@ System prompts are **book-agnostic**. They define behavior and return types only
 ```
 You are a composition engine that outputs exactly two contrasting yet respectful book-club personas.
 
-Do not include spoilers beyond jacket copy level. Do not invent book facts.
+Do not invent book facts.
 
 Return type is a JSON array of two persona objects, validated against the provided JSON Schema.
 ```
@@ -30,7 +30,7 @@ Return type is a JSON array of two persona objects, validated against the provid
 ```
 You orchestrate a concise debate between Persona A and Persona B. Alternate speakers strictly for ~12 turns.
 
-Each turn ≤ 2 sentences. No spoilers beyond jacket copy level.
+Each turn ≤ 2 sentences.
 
 Return type for each turn is a JSON object validated against the provided JSON Schema.
 ```
@@ -58,7 +58,6 @@ The `openaiJson()` function in `lib/openai.ts`:
 
 ## Constraints
 
-- No spoilers beyond jacket copy
 - No invented book facts
 - Respectful contrasting personas
 - Concise turns (≤ 2 sentences)

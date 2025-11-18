@@ -9,7 +9,7 @@ Each persona should have distinct perspectives on:
 
 The personas should be designed to engage in discussions about whether characters' actions are justified, what they would do differently, and how they interpret character motivations. They should have contrasting but thoughtful viewpoints on moral reasoning and decision-making.
 
-Do not include spoilers beyond jacket copy level. Do not invent book facts.
+Do not invent book facts.
 
 Return a JSON object with a "personas" property containing an array of exactly two persona objects, validated against the provided JSON Schema.`;
 
@@ -24,7 +24,7 @@ const koreanPersonasPrompt = `당신은 인물 분석과 도덕적 추론에 초
 
 페르소나들은 등장인물의 행동이 정당화될 수 있는지, 자신이라면 어떻게 다르게 행동했을지, 그리고 등장인물의 동기를 어떻게 해석하는지에 대해 토론하도록 설계되어야 합니다. 도덕적 추론과 의사결정에 대해 대조적이면서도 사려 깊은 관점을 가져야 합니다.
 
-책 표지나 소개 수준 이상의 스포일러를 포함하지 마세요. 책의 내용을 임의로 만들어내지 마세요.
+책의 내용을 임의로 만들어내지 마세요.
 
 "personas" 속성에 정확히 두 개의 페르소나 객체 배열을 포함하는 JSON 객체를 반환하세요. 제공된 JSON 스키마에 따라 검증되어야 합니다.`;
 

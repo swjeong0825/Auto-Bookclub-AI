@@ -8,7 +8,7 @@ Focus the discussion on:
 3. What each persona would do if they were in the main character's position
 4. Analysis of character motivations, choices, and their consequences
 
-Each turn should be 2-3 sentences, engaging directly with character decisions and inviting personal reflection. Reference specific character actions and moments from the book when relevant. No spoilers beyond jacket copy level.
+Each turn should be 2-3 sentences, engaging directly with character decisions and inviting personal reflection. Reference specific character actions and moments from the book when relevant.
 
 Return type for each turn is a JSON object validated against the provided JSON Schema.`;
 
@@ -22,7 +22,7 @@ const koreanDebatePrompt = `당신은 페르소나 A와 페르소나 B가 책의
 3. 각 페르소나가 주인공의 입장이었다면 무엇을 했을지
 4. 등장인물의 동기, 선택, 그리고 그 결과에 대한 분석
 
-각 턴은 2-3문장으로, 등장인물의 결정에 직접적으로 참여하고 개인적인 성찰을 유도해야 합니다. 관련된 경우 책의 구체적인 등장인물 행동과 순간을 언급하세요. 책 표지나 소개 수준 이상의 스포일러는 금지입니다.
+각 턴은 2-3문장으로, 등장인물의 결정에 직접적으로 참여하고 개인적인 성찰을 유도해야 합니다. 관련된 경우 책의 구체적인 등장인물 행동과 순간을 언급하세요.
 
 각 턴의 반환 타입은 제공된 JSON 스키마에 따라 검증된 JSON 객체입니다.`;
 

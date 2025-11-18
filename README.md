@@ -86,4 +86,3 @@ lib/
 - Book data never passed via route/query params
 - System prompts are book-agnostic
 - JSON Schema strict mode enforced
-- No spoilers beyond jacket copy level
