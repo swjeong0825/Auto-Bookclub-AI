@@ -28,12 +28,12 @@ const koreanPersonasPrompt = `당신은 인물 분석과 도덕적 추론에 초
 
 "personas" 속성에 정확히 두 개의 페르소나 객체 배열을 포함하는 JSON 객체를 반환하세요. 제공된 JSON 스키마에 따라 검증되어야 합니다.`;
 
-const personasPrompts: Record<Language, string> = {
+const personasPrompts: Partial<Record<Language, string>> = {
   [Language.ENGLISH]: englishPersonasPrompt,
   [Language.KOREAN]: koreanPersonasPrompt,
 };
 
 export function getPersonasSystemPrompt(language: Language = Language.ENGLISH): string {
-  return personasPrompts[language] || personasPrompts[Language.ENGLISH];
+  return personasPrompts[language] || personasPrompts[Language.ENGLISH]!;
 }
 

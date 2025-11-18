@@ -26,12 +26,12 @@ const koreanDebatePrompt = `당신은 페르소나 A와 페르소나 B가 책의
 
 각 턴의 반환 타입은 제공된 JSON 스키마에 따라 검증된 JSON 객체입니다.`;
 
-const debatePrompts: Record<Language, string> = {
+const debatePrompts: Partial<Record<Language, string>> = {
   [Language.ENGLISH]: englishDebatePrompt,
   [Language.KOREAN]: koreanDebatePrompt,
 };
 
 export function getDebateSystemPrompt(language: Language = Language.ENGLISH): string {
-  return debatePrompts[language] || debatePrompts[Language.ENGLISH];
+  return debatePrompts[language] || debatePrompts[Language.ENGLISH]!;
 }
 
