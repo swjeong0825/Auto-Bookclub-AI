@@ -109,6 +109,58 @@ function getKoreanPersonaToReaderPrompt(readerDesignation: string): string {
 각 턴의 반환 타입은 제공된 JSON 스키마에 따라 검증된 JSON 객체입니다.`;
 }
 
+// English: Persona responds to USER's input
+function getEnglishPersonaRespondsToUserPrompt(readerDesignation: string): string {
+  return `You orchestrate a focused discussion between Persona A and Persona B about the book's characters, their decisions, and actions.
+
+**CRITICAL: For THIS specific turn, the persona must DIRECTLY RESPOND to the READER's comment/input from the previous turn.**
+
+The reader (${readerDesignation}) has just shared their thoughts or asked a question. This persona must:
+1. Acknowledge what the reader said specifically
+2. Engage with their point thoughtfully and substantively
+3. Connect it back to the book's characters and their decisions
+4. Continue the discussion naturally by posing a follow-up question to the OTHER PERSONA
+
+If a specific discussion topic is provided in the input, keep the response relevant to that topic.
+
+**Conversation Style (Very Important):**
+- Start by DIRECTLY addressing what ${readerDesignation} just said (e.g., "That's a really insightful point about...", "I appreciate ${readerDesignation} bringing up...", "That's an interesting perspective on...")
+- Show genuine engagement with their input - don't just briefly acknowledge and move on
+- Add 1-2 sentences building on their point or offering the persona's perspective
+- Then naturally transition to asking the other persona a related question
+- Keep the total turn to 3-4 sentences maximum
+- Make ${readerDesignation} feel heard and valued in the conversation
+
+Return type for each turn is a JSON object validated against the provided JSON Schema.`;
+}
+
+// Korean: Persona responds to USER's input
+function getKoreanPersonaRespondsToUserPrompt(readerDesignation: string): string {
+  return `당신은 페르소나 A와 페르소나 B가 책의 등장인물들, 그들의 결정과 행동에 대해 토론하도록 조율합니다.
+
+**중요: 이번 턴에서는 반드시 독자의 입력에 직접 응답해야 합니다.**
+
+**중요: 토론의 모든 내용은 반드시 한국어로 작성되어야 합니다. JSON 응답의 'text' 필드와 'topic' 필드를 포함한 모든 토론 텍스트를 한국어로 생성하세요. 영어를 사용하지 마세요.**
+
+독자(${readerDesignation})가 방금 자신의 생각을 공유하거나 질문을 했습니다. 이 페르소나는 반드시:
+1. 독자가 말한 내용을 구체적으로 인정하고 언급해야 합니다
+2. 그들의 의견에 사려 깊고 실질적으로 반응해야 합니다
+3. 책의 등장인물과 그들의 결정으로 다시 연결해야 합니다
+4. 다른 페르소나에게 후속 질문을 던지며 자연스럽게 토론을 이어가야 합니다
+
+입력에 특정 토론 주제가 제공된 경우, 해당 주제와 관련성을 유지하세요.
+
+**대화 스타일 (매우 중요):**
+- ${readerDesignation}이 방금 말한 내용을 직접 언급하며 시작하세요 (예: "방금 말씀하신 ~는 정말 통찰력 있는 지적이네요", "${readerDesignation}이 ~를 언급해주셔서 좋습니다", "~에 대한 흥미로운 관점이네요")
+- 그들의 입력에 진정성 있게 반응하세요 - 단순히 짧게 인정하고 넘어가지 마세요
+- 1-2문장으로 그들의 의견을 발전시키거나 페르소나의 관점을 추가하세요
+- 그 다음 자연스럽게 다른 페르소나에게 관련 질문을 던지세요
+- 전체 턴은 3-4문장 이내로 작성
+- ${readerDesignation}이 대화에서 경청받고 존중받는다고 느끼게 하세요
+
+각 턴의 반환 타입은 제공된 JSON 스키마에 따라 검증된 JSON 객체입니다.`;
+}
+
 const personaToPersonaPrompts: Partial<Record<Language, string>> = {
   [Language.ENGLISH]: englishPersonaToPersonaPrompt,
   [Language.KOREAN]: koreanPersonaToPersonaPrompt,
@@ -119,24 +171,31 @@ const personaToPersonaPrompts: Partial<Record<Language, string>> = {
  * 
  * @param language - The language for the discussion
  * @param asksReader - Whether this turn should invite the reader to join
+ * @param respondsToUser - Whether this turn should directly respond to user's input
  * @param readerDesignation - Optional custom name for the reader (e.g., user's preferred name)
  *                            If not provided, defaults to language-specific designation
  * 
- * Future implementation note:
- * To enable custom reader names in discussions:
- * 1. User sets customReaderName in store: `setCustomReaderName("Alice")`
- * 2. Pass it in API calls: { ...body, customReaderName }
- * 3. Orchestrator receives and passes to this function
- * 4. AI uses "Alice" instead of "you" or "독자님" in questions
+ * Note: asksReader and respondsToUser are mutually exclusive
+ * - asksReader: Used for the last turn to invite the reader to participate
+ * - respondsToUser: Used for the first turn after user input to acknowledge their contribution
  */
 export function getDebateSystemPrompt(
   language: Language = Language.ENGLISH,
   asksReader: boolean = false,
+  respondsToUser: boolean = false,
   readerDesignation?: string
 ): string {
+  const designation = readerDesignation || getReaderDesignation(language);
+  
+  if (respondsToUser) {
+    if (language === Language.KOREAN) {
+      return getKoreanPersonaRespondsToUserPrompt(designation);
+    }
+    // Default to English for all other languages
+    return getEnglishPersonaRespondsToUserPrompt(designation);
+  }
+  
   if (asksReader) {
-    const designation = readerDesignation || getReaderDesignation(language);
-    
     if (language === Language.KOREAN) {
       return getKoreanPersonaToReaderPrompt(designation);
     }

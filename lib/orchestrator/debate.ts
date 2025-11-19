@@ -69,8 +69,16 @@ export async function generateDebate(
     // Always ask on the last turn of THIS generation (not checking previous rounds)
     const shouldAskReader = (i === turns - 1);
 
+    // Determine if this turn should respond to user input
+    // True when it's the first turn AND the last turn in previousTurns was from USER
+    const shouldRespondToUser = (
+      i === 0 && 
+      previousTurns.length > 0 && 
+      previousTurns[previousTurns.length - 1].speaker === "USER"
+    );
+
     const turn = await openaiJson<{ text: string; topic?: string }>({
-      system: getDebateSystemPrompt(language, shouldAskReader, customReaderName),
+      system: getDebateSystemPrompt(language, shouldAskReader, shouldRespondToUser, customReaderName),
       input: turnInput,
       schema: debateTurnSchema,
       maxOutputTokens: 300,
@@ -82,6 +90,7 @@ export async function generateDebate(
       text: turn.text,
       topic: turn.topic,
       asksReader: shouldAskReader, // Set in code, not from AI
+      respondsToUser: shouldRespondToUser, // Set in code, not from AI
     });
 
     // Increment the loading state after each discussion turn is created
