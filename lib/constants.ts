@@ -26,5 +26,5 @@ export enum Language {
  * - Used for initial debate generation
  * - Used when user continues the discussion
  */
-export const DEFAULT_DISCUSSION_TURNS = 4;
+export const DEFAULT_DISCUSSION_TURNS = 3;
 
