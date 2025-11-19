@@ -36,13 +36,6 @@ export default function ResultsModal({
       if (e.key === "Escape") {
         onClose();
       }
-      if (e.key === "Backspace") {
-        if (currentPage === "topics") {
-          setCurrentPage("books");
-        } else {
-          onClose();
-        }
-      }
     };
 
     const handleClickOutside = (e: MouseEvent) => {
