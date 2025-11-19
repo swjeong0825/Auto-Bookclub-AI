@@ -8,7 +8,7 @@ import { SSE_PREFIX, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
 
 export default function DiscussClient() {
   const router = useRouter();
-  const { meta, language, selectedTopic, personas, transcript, setPersonas, setTranscript, setProgress } = useAppStore();
+  const { meta, language, selectedTopic, personas, transcript, customReaderName, setPersonas, setTranscript, setProgress } = useAppStore();
   const hasStartedRef = useRef(false);
   
 
@@ -66,6 +66,7 @@ export default function DiscussClient() {
             turns: DEFAULT_DISCUSSION_TURNS,
             language,
             topic: selectedTopic,
+            customReaderName,
           }),
         });
 

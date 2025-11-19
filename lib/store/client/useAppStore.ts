@@ -14,16 +14,26 @@ export const useAppStore = create<{
   personas?: [Persona, Persona];
   transcript?: Transcript;
   progress?: number;
+  /**
+   * Optional: User's custom name to use in discussions
+   * - If set, overrides language-based designation ("you", "독자님", etc.)
+   * - Used in UI display and AI prompts when asking reader questions
+   * - Example: setCustomReaderName("Sarah") -> Personas ask "Sarah, what do you think?"
+   * - Set to undefined to use language default
+   */
+  customReaderName?: string;
   setMeta: (m: BookResult, lang: Language) => void;
   setSelectedTopic: (topic: string) => void;
   setPersonas: (p: [Persona, Persona]) => void;
   setTranscript: (t: Transcript) => void;
   setProgress: (p: number | undefined) => void;
+  setCustomReaderName: (name: string | undefined) => void;
   reset: () => void;
 }>((set) => ({
   step: "idle",
   language: Language.ENGLISH,
   progress: undefined,
+  customReaderName: undefined,
   setMeta: (meta, language) =>
     set({ 
       meta, 
@@ -38,6 +48,7 @@ export const useAppStore = create<{
   setPersonas: (personas) => set({ personas, step: "personas" }),
   setTranscript: (transcript) => set({ transcript, progress: undefined, step: "done" }),
   setProgress: (progress) => set({ progress }),
+  setCustomReaderName: (customReaderName) => set({ customReaderName }),
   reset: () =>
     set({
       step: "idle",
@@ -47,6 +58,7 @@ export const useAppStore = create<{
       personas: undefined,
       transcript: undefined,
       progress: undefined,
+      customReaderName: undefined,
     }),
 }));
 

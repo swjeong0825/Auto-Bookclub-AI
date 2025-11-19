@@ -5,15 +5,22 @@ import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/client";
 import type { DebateTurn } from "@/lib/types";
 import { SSE_PREFIX, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
+import { getReaderDesignation } from "@/lib/prompts/debate.system";
 
 export default function Transcript() {
   const router = useRouter();
-  const { meta, transcript, progress, reset, language, selectedTopic, setTranscript } = useAppStore();
+  const { meta, transcript, progress, reset, language, selectedTopic, customReaderName, setTranscript } = useAppStore();
   const [copied, setCopied] = useState(false);
   const [userPrompt, setUserPrompt] = useState("");
   const [isContinuing, setIsContinuing] = useState(false);
   const [continueProgress, setContinueProgress] = useState<number | undefined>(undefined);
   const hasStartedContinue = useRef(false);
+
+  // Get reader designation: use custom name if provided, otherwise default to language-based designation
+  const readerDesignation = customReaderName || getReaderDesignation(language);
+  // Capitalize first letter for display (only if not custom name, as custom name should be displayed as-is)
+  const readerLabel = customReaderName || 
+    (readerDesignation.charAt(0).toUpperCase() + readerDesignation.slice(1));
 
   if (!meta) {
     return null;
@@ -67,6 +74,7 @@ export default function Transcript() {
           language,
           continueTurns: DEFAULT_DISCUSSION_TURNS,
           topic: selectedTopic,
+          customReaderName,
         }),
       });
 
@@ -148,7 +156,7 @@ export default function Transcript() {
     text += "---\n\n";
     t.turns.forEach((turn) => {
       if (turn.speaker === "USER") {
-        text += `You: ${turn.text}\n\n`;
+        text += `${readerLabel}: ${turn.text}\n\n`;
       } else {
         const persona = turn.speaker === "A" ? t.personas[0] : t.personas[1];
         text += `${persona.name} (${turn.speaker}): ${turn.text}\n\n`;
@@ -227,7 +235,7 @@ export default function Transcript() {
                     U
                   </div>
                   <div className="turn-speaker" style={{ fontWeight: 600 }}>
-                    You
+                    {readerLabel}
                   </div>
                 </div>
                 <div className="turn-text" style={{ fontStyle: "italic" }}>
@@ -240,10 +248,18 @@ export default function Transcript() {
           const persona =
             turn.speaker === "A" ? transcript.personas[0] : transcript.personas[1];
           return (
-            <div key={turn.idx} className="turn">
+            <div 
+              key={turn.idx} 
+              className={`turn ${turn.asksReader ? "turn-asks-reader" : ""}`}
+            >
               <div className="turn-header">
                 <div className="turn-avatar">{turn.speaker}</div>
                 <div className="turn-speaker">{persona.name}</div>
+                {turn.asksReader && (
+                  <div className="reader-question-badge">
+                    💬 Asking you
+                  </div>
+                )}
               </div>
               <div className="turn-text">{turn.text}</div>
             </div>

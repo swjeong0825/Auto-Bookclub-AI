@@ -23,7 +23,8 @@ export async function generateDebate(
   language: Language = Language.ENGLISH,
   previousTurns: DebateTurn[] = [],
   startingSpeaker: "A" | "B" = "A",
-  topic?: string
+  topic?: string,
+  customReaderName?: string
 ): Promise<Transcript> {
   const input = {
     book: {
@@ -64,11 +65,15 @@ export async function generateDebate(
       currentSpeaker,
     };
 
+    // Determine if this turn should ask the reader
+    // Always ask on the last turn of THIS generation (not checking previous rounds)
+    const shouldAskReader = (i === turns - 1);
+
     const turn = await openaiJson<{ text: string; topic?: string }>({
-      system: getDebateSystemPrompt(language),
+      system: getDebateSystemPrompt(language, shouldAskReader, customReaderName),
       input: turnInput,
       schema: debateTurnSchema,
-      maxOutputTokens: 200,
+      maxOutputTokens: 300,
     });
 
     debateTurns.push({
@@ -76,6 +81,7 @@ export async function generateDebate(
       speaker: currentSpeaker,
       text: turn.text,
       topic: turn.topic,
+      asksReader: shouldAskReader, // Set in code, not from AI
     });
 
     // Increment the loading state after each discussion turn is created

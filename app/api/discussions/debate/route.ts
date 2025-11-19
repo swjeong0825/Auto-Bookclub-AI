@@ -22,6 +22,7 @@ export async function POST(
     const turns: number = body.turns || DEFAULT_DISCUSSION_TURNS;
     const language: Language = body.language || Language.ENGLISH;
     const topic: string | undefined = body.topic;
+    const customReaderName: string | undefined = body.customReaderName;
 
     if (!metaHint || !metaHint.title) {
       return NextResponse.json(
@@ -61,7 +62,7 @@ export async function POST(
         }, 1000);
 
         try {
-          const transcript = await generateDebate(metaHint, personas, turns, loadingState, language, [], "A", topic);
+          const transcript = await generateDebate(metaHint, personas, turns, loadingState, language, [], "A", topic, customReaderName);
           clearInterval(intervalId);
           
           // Send final progress (100%)

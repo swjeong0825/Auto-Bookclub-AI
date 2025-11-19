@@ -21,6 +21,7 @@ export type DebateTurn = {
   speaker: "A" | "B" | "USER";
   text: string;
   topic?: string;
+  asksReader?: boolean; // Indicates if this turn asks a question to the reader
 };
 
 export type Transcript = {
