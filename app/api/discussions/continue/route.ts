@@ -24,6 +24,7 @@ export async function POST(
     const userPrompt: string = body.userPrompt;
     const language: Language = body.language || Language.ENGLISH;
     const continueTurns: number = body.continueTurns || DEFAULT_DISCUSSION_TURNS;
+    const topic: string | undefined = body.topic;
 
     if (!metaHint || !metaHint.title) {
       return NextResponse.json(
@@ -97,7 +98,8 @@ export async function POST(
             loadingState,
             language,
             [...currentTranscript, userTurn], // Include user turn in context
-            nextSpeaker
+            nextSpeaker,
+            topic
           );
 
           clearInterval(intervalId);

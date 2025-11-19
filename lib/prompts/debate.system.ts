@@ -2,6 +2,8 @@ import { Language } from "@/lib/constants";
 
 const englishDebatePrompt = `You orchestrate a focused discussion between Persona A and Persona B about the book's characters, their decisions, and actions. Alternate speakers strictly for ~6 turns.
 
+If a specific discussion topic is provided in the input, center the entire discussion around that topic while maintaining the character-focused approach. All turns should relate back to the provided topic.
+
 Focus the discussion on:
 1. Specific decisions and actions taken by the main characters in the book
 2. Whether these character decisions and ideas can be justified or criticized
@@ -15,6 +17,8 @@ Return type for each turn is a JSON object validated against the provided JSON S
 const koreanDebatePrompt = `당신은 페르소나 A와 페르소나 B가 책의 등장인물들, 그들의 결정과 행동에 대해 토론하도록 조율합니다. 약 6턴 동안 엄격하게 발언자를 교대합니다.
 
 **중요: 토론의 모든 내용은 반드시 한국어로 작성되어야 합니다. JSON 응답의 'text' 필드와 'topic' 필드를 포함한 모든 토론 텍스트를 한국어로 생성하세요. 영어를 사용하지 마세요.**
+
+입력에 특정 토론 주제가 제공된 경우, 인물 중심 접근 방식을 유지하면서 전체 토론을 해당 주제를 중심으로 진행하세요. 모든 턴은 제공된 주제와 연결되어야 합니다.
 
 토론의 초점:
 1. 책의 주요 등장인물들이 내린 구체적인 결정과 행동

@@ -8,7 +8,7 @@ import { SSE_PREFIX, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
 
 export default function Transcript() {
   const router = useRouter();
-  const { meta, transcript, progress, reset, language, setTranscript } = useAppStore();
+  const { meta, transcript, progress, reset, language, selectedTopic, setTranscript } = useAppStore();
   const [copied, setCopied] = useState(false);
   const [userPrompt, setUserPrompt] = useState("");
   const [isContinuing, setIsContinuing] = useState(false);
@@ -66,6 +66,7 @@ export default function Transcript() {
           userPrompt: userPrompt.trim(),
           language,
           continueTurns: DEFAULT_DISCUSSION_TURNS,
+          topic: selectedTopic,
         }),
       });
 
@@ -179,6 +180,13 @@ export default function Transcript() {
         </div>
       </div>
 
+      {selectedTopic && (
+        <div className="discussion-topic-banner">
+          <div className="discussion-topic-label">Discussion Topic</div>
+          <div className="discussion-topic-text">{selectedTopic}</div>
+        </div>
+      )}
+
       <div className="personas-intro">
         <div className="persona-card">
           <div className="persona-avatar">A</div>
@@ -236,9 +244,6 @@ export default function Transcript() {
               <div className="turn-header">
                 <div className="turn-avatar">{turn.speaker}</div>
                 <div className="turn-speaker">{persona.name}</div>
-                {turn.topic && (
-                  <span className="turn-topic subtle">• {turn.topic}</span>
-                )}
               </div>
               <div className="turn-text">{turn.text}</div>
             </div>

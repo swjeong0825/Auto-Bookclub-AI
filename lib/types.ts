@@ -26,5 +26,6 @@ export type DebateTurn = {
 export type Transcript = {
   personas: [Persona, Persona];
   turns: DebateTurn[];
+  discussionTopic?: string;
 };
 
