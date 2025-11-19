@@ -600,6 +600,120 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* User Settings Page */
+.settings-welcome-section {
+  text-align: center;
+  margin-bottom: var(--space-8);
+  padding: var(--space-6) var(--space-4);
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+}
+
+.settings-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+  opacity: 0.9;
+}
+
+.settings-description {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0 0 var(--space-3) 0;
+  font-weight: 500;
+}
+
+.settings-form {
+  margin-bottom: var(--space-6);
+}
+
+.settings-field-group {
+  margin-bottom: var(--space-6);
+}
+
+.settings-field-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: var(--space-3);
+  color: var(--text);
+}
+
+.optional-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: var(--space-1) var(--space-2);
+  background: rgba(74, 144, 226, 0.1);
+  color: var(--brand);
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.settings-field-input {
+  width: 100%;
+  padding: var(--space-4);
+  border-radius: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  font-size: 1rem;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.settings-field-input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.settings-field-input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.settings-field-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-2);
+  gap: var(--space-3);
+}
+
+.settings-field-hint {
+  font-size: 0.875rem;
+  flex: 1;
+}
+
+.char-counter {
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.settings-start-btn {
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.settings-start-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
+}
+
 @media (max-width: 768px) {
   .search-box {
     flex-direction: column;

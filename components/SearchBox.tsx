@@ -6,6 +6,7 @@ import { useAppStore } from "@/lib/store/client";
 import { Language } from "@/lib/constants";
 import { detectLanguage, getLanguageCode } from "@/lib/utils/languageDetection";
 import ResultsModal from "./ResultsModal";
+import type { UserSettings } from "./ResultsModal/UserSettingsPage";
 import type { BookResult } from "@/lib/types";
 
 export default function SearchBox() {
@@ -65,7 +66,7 @@ export default function SearchBox() {
     }
   };
 
-  const handleSelect = async (book: BookResult, topic: string) => {
+  const handleSelect = async (book: BookResult, topic: string, userSettings: UserSettings) => {
     setShowModal(false);
     setIsLoading(true);
 
@@ -78,9 +79,10 @@ export default function SearchBox() {
       const resolved = await res.json();
       setMeta(resolved, language);
       
-      // Store selected topic in Zustand
-      const { setSelectedTopic } = useAppStore.getState();
+      // Store selected topic and user settings in Zustand
+      const { setSelectedTopic, setCustomReaderName } = useAppStore.getState();
       setSelectedTopic(topic);
+      setCustomReaderName(userSettings.customReaderName);
       
       router.push("/discuss");
     } catch (error) {

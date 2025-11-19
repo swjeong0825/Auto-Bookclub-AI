@@ -4,18 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import type { BookResult } from "@/lib/types";
 import BookSelectionPage from "./BookSelectionPage";
 import TopicSelectionPage from "./TopicSelectionPage";
+import UserSettingsPage, { type UserSettings } from "./UserSettingsPage";
 import ModalPageIndicators from "./ModalPageIndicators";
 
 interface ResultsModalProps {
   results: BookResult[];
-  onSelect: (book: BookResult, topic: string) => void;
+  onSelect: (book: BookResult, topic: string, userSettings: UserSettings) => void;
   onClose: () => void;
   selectedLanguage: string;
   onLanguageChange: (language: string) => void;
   topicsCache: Map<string, string[]>;
 }
 
-type ModalPage = "books" | "topics";
+type ModalPage = "books" | "topics" | "settings";
 
 export default function ResultsModal({
   results,
@@ -28,6 +29,7 @@ export default function ResultsModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState<ModalPage>("books");
   const [selectedBook, setSelectedBook] = useState<BookResult | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [topics, setTopics] = useState<string[]>([]);
   const [isLoadingTopics, setIsLoadingTopics] = useState(false);
 
@@ -102,13 +104,22 @@ export default function ResultsModal({
   };
 
   const handleTopicSelect = (topic: string) => {
-    if (selectedBook) {
-      onSelect(selectedBook, topic);
+    setSelectedTopic(topic);
+    setCurrentPage("settings");
+  };
+
+  const handleSettingsComplete = (userSettings: UserSettings) => {
+    if (selectedBook && selectedTopic) {
+      onSelect(selectedBook, selectedTopic, userSettings);
     }
   };
 
   const goToPage = (page: ModalPage) => {
-    if (page === "books" || (page === "topics" && selectedBook)) {
+    if (
+      page === "books" ||
+      (page === "topics" && selectedBook) ||
+      (page === "settings" && selectedBook && selectedTopic)
+    ) {
       setCurrentPage(page);
     }
   };
@@ -134,11 +145,19 @@ export default function ResultsModal({
               onTopicSelect={handleTopicSelect}
             />
           )}
+
+          {currentPage === "settings" && (
+            <UserSettingsPage
+              initialCustomReaderName={undefined}
+              onComplete={handleSettingsComplete}
+            />
+          )}
         </div>
 
         <ModalPageIndicators
           currentPage={currentPage}
           hasSelectedBook={!!selectedBook}
+          hasSelectedTopic={!!selectedTopic}
           onPageChange={goToPage}
         />
       </div>
