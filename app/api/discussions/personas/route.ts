@@ -17,6 +17,7 @@ export async function POST(
     const body = await request.json();
     const metaHint: BookResult = body.metaHint;
     const language: Language = body.language || Language.ENGLISH;
+    const topic: string | undefined = body.topic;
 
     if (!metaHint || !metaHint.title) {
       return NextResponse.json(
@@ -25,7 +26,7 @@ export async function POST(
       );
     }
 
-    const personas = await createPersonas(metaHint, language);
+    const personas = await createPersonas(metaHint, language, topic);
     return NextResponse.json({ personas, meta: metaHint });
   } catch (error) {
     console.error("Personas error:", error);

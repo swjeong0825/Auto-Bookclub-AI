@@ -22,7 +22,8 @@ export async function generateDebate(
   loadingState: DiscussionLoadingState,
   language: Language = Language.ENGLISH,
   previousTurns: DebateTurn[] = [],
-  startingSpeaker: "A" | "B" = "A"
+  startingSpeaker: "A" | "B" = "A",
+  topic?: string
 ): Promise<Transcript> {
   const input = {
     book: {
@@ -35,6 +36,7 @@ export async function generateDebate(
     personaA: personas[0],
     personaB: personas[1],
     targetTurns: turns,
+    ...(topic && { discussionTopic: topic }),
   };
 
   const debateTurns: DebateTurn[] = [];

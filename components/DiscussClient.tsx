@@ -8,7 +8,7 @@ import { SSE_PREFIX, DEFAULT_DISCUSSION_TURNS } from "@/lib/constants";
 
 export default function DiscussClient() {
   const router = useRouter();
-  const { meta, language, personas, transcript, setPersonas, setTranscript, setProgress } = useAppStore();
+  const { meta, language, selectedTopic, personas, transcript, setPersonas, setTranscript, setProgress } = useAppStore();
   const hasStartedRef = useRef(false);
   
 
@@ -39,7 +39,7 @@ export default function DiscussClient() {
           const r1 = await fetch("/api/discussions/personas", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ metaHint: meta, language }),
+            body: JSON.stringify({ metaHint: meta, language, topic: selectedTopic }),
           });
 
           if (!r1.ok) {
@@ -65,6 +65,7 @@ export default function DiscussClient() {
             personas: currentPersonas,
             turns: DEFAULT_DISCUSSION_TURNS,
             language,
+            topic: selectedTopic,
           }),
         });
 

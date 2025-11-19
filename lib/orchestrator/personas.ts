@@ -31,7 +31,8 @@ const personasSchema = {
 
 export async function createPersonas(
   meta: BookResult,
-  language: Language = Language.ENGLISH
+  language: Language = Language.ENGLISH,
+  topic?: string
 ): Promise<[Persona, Persona]> {
   const input = {
     book: {
@@ -41,6 +42,7 @@ export async function createPersonas(
       description: meta.description,
       subjects: meta.subjects,
     },
+    ...(topic && { discussionTopic: topic }),
   };
 
   const result = await openaiJson<{ personas: Persona[] }>({

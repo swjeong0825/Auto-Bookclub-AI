@@ -18,6 +18,9 @@ export default function SearchBox() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { setMeta } = useAppStore();
+  
+  // Persistent topics cache that survives modal open/close
+  const topicsCacheRef = useRef<Map<string, string[]>>(new Map());
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -62,7 +65,7 @@ export default function SearchBox() {
     }
   };
 
-  const handleSelect = async (book: BookResult) => {
+  const handleSelect = async (book: BookResult, topic: string) => {
     setShowModal(false);
     setIsLoading(true);
 
@@ -74,6 +77,11 @@ export default function SearchBox() {
       });
       const resolved = await res.json();
       setMeta(resolved, language);
+      
+      // Store selected topic in Zustand
+      const { setSelectedTopic } = useAppStore.getState();
+      setSelectedTopic(topic);
+      
       router.push("/discuss");
     } catch (error) {
       console.error("Resolve failed:", error);
@@ -116,6 +124,7 @@ export default function SearchBox() {
           onClose={() => setShowModal(false)}
           selectedLanguage={language}
           onLanguageChange={(lang) => setLanguage(lang as Language)}
+          topicsCache={topicsCacheRef.current}
         />
       )}
     </>
