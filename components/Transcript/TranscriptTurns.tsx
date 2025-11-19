@@ -21,7 +21,7 @@ export default function TranscriptTurns({
           return (
             <div key={turn.idx} className="turn turn-user">
               <div className="turn-header">
-                <div className="turn-avatar" style={{ background: "var(--accent-bg)" }}>
+                <div className="turn-avatar turn-avatar-user">
                   U
                 </div>
                 <div className="turn-speaker" style={{ fontWeight: 600 }}>
