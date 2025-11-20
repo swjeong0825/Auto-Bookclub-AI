@@ -1,8 +1,8 @@
-import SearchBoxDemo from "@/components-demo/SearchBoxDemo";
+import AutoBookDemo from "@/components-demo/AutoBookDemo";
 
 export const dynamic = "force-dynamic";
 
 export default function DemoPage() {
-  return <SearchBoxDemo />;
+  return <AutoBookDemo />;
 }
 

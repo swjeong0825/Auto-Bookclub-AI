@@ -23,7 +23,7 @@ export default function TranscriptHeader({
       </div>
       <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center" }}>
         <button onClick={onNewSearch} className="btn">
-          New Search
+          New Discussion
         </button>
         <button onClick={onCopyTranscript} className="btn btn-primary">
           {copied ? "Copied!" : "Copy Transcript"}
