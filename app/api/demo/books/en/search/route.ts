@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { search } from "@/lib/providers/books/openlibrary";
+import { search } from "@/lib/providers/books/googlebooks";
 import type { BookResult } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
