@@ -10,13 +10,26 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
 
+  const isApiRoute = req.nextUrl.pathname.startsWith('/api');
+  const isDemoApiRoute = req.nextUrl.pathname.startsWith('/api/demo');
 
-  // TODO: Uncomment this when we have a Demo Page
-  ////If the route is not public and user is not authenticated, redirect to intro page
-  // if (!isPublicRoute(req) && !userId) {
-  //   const introUrl = new URL("/public/intro", req.url);
-  //   return NextResponse.redirect(introUrl);
-  // }
+  // If not authenticated and not a public route
+  if (!isPublicRoute(req) && !userId) {
+    // For API routes: only allow demo endpoints, block others
+    if (isApiRoute) {
+      if (!isDemoApiRoute) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
+      // Demo API routes are allowed through
+    } else {
+      // For page routes: redirect to intro page
+      const introUrl = new URL("/public/intro", req.url);
+      return NextResponse.redirect(introUrl);
+    }
+  }
 });
 
 export const config = {
