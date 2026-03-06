@@ -40,10 +40,13 @@ export async function search(
   
   // Search specifically for Korean books by adding langRestrict parameter
   url.searchParams.set("q", title);
-  url.searchParams.set("langRestrict", "ko"); // Korean language restriction
-  url.searchParams.set("maxResults", Math.min(limit, 40).toString()); // API limit is 40
-  url.searchParams.set("printType", "books"); // Only books, not magazines
-  
+  url.searchParams.set("langRestrict", "ko");
+  url.searchParams.set("maxResults", Math.min(limit, 40).toString());
+  url.searchParams.set("printType", "books");
+  if (process.env.GOOGLE_BOOKS_API_KEY) {
+    url.searchParams.set("key", process.env.GOOGLE_BOOKS_API_KEY);
+  }
+
   const res = await fetch(url.toString());
   if (!res.ok) {
     throw new Error(`Google Books search failed: ${res.statusText}`);
@@ -87,8 +90,11 @@ export async function resolve(metaHint: Partial<BookResult>): Promise<BookResult
   // If we have a workKey (Google Books ID), fetch detailed info
   if (metaHint.workKey) {
     try {
-      const url = `https://www.googleapis.com/books/v1/volumes/${metaHint.workKey}`;
-      const res = await fetch(url);
+      const resolveUrl = new URL(`https://www.googleapis.com/books/v1/volumes/${metaHint.workKey}`);
+      if (process.env.GOOGLE_BOOKS_API_KEY) {
+        resolveUrl.searchParams.set("key", process.env.GOOGLE_BOOKS_API_KEY);
+      }
+      const res = await fetch(resolveUrl.toString());
       
       if (res.ok) {
         const data: GoogleBooksVolume = await res.json();
